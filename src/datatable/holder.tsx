@@ -1,5 +1,5 @@
 import * as React from "react";
-import {CELL_HEIGHT, DatatableProps} from "./index";
+import {CELL_HEIGHT, DatatableProps, Row} from "./index";
 import {Raw} from "./raw";
 
 
@@ -28,7 +28,8 @@ export class Holder extends React.Component<DatatableProps, State> {
         if (rows) {
             const visibleItem = this.state.visibleItem;
             const list = [];
-            for (let index = visibleItem.start; index < visibleItem.end; index++) {
+            const end = rows.length - 1 < this.state.visibleItem.end ? rows.length : this.state.visibleItem.end;
+            for (let index = visibleItem.start; index < end; index++) {
                 const rowValue = rows[index];
                 const rawTop = index * CELL_HEIGHT;
                 list.push(<Raw key={index.toString()} value={rowValue} top={rawTop} columns={this.props.columns}/>)

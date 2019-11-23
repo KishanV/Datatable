@@ -3,148 +3,243 @@
   position: absolute;
   width: calc(100% - 20px);
   height: calc(100% - 20px);
-  border: 1px solid #ccc;
+  border: 1px solid #c5c5c5;
   border-radius: 6px;
   box-sizing: border-box;
   top: 10px;
   left: 10px;
+  overflow: hidden;
 
-  > .Title {
+  > .Search {
     position: absolute;
     width: 100%;
-    height: 30px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    transform: translateZ(0);
+    height: 60px;
+    background: #f5f5f5;
+    z-index: 2;
 
-    > .Check-Box {
-      position: relative;
-      float: left;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      width: 30px;
-      border-right: 1px solid #eee;
-      box-sizing: border-box;
-
-      > .Button {
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        top: 50%;
-        left: 50%;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-        transform: translateX(-50%) translateY(-50%);
-        box-sizing: border-box;
-
-        > .Surface {
-          width: 10px;
-          height: 10px;
-          position: absolute;
-          background: #2388FF;
-          border-radius: 2px;
-          top: 2px;
-          left: 2px;
-        }
-      }
-    }
-
-    > .Cell {
-      position: relative;
-      float: left;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      flex: 1;
-      border-right: 1px solid #eee;
-      box-sizing: border-box;
-    }
-  }
-
-  > .Body {
-    position: absolute;
-    width: 100%;
-    height: calc(100% - 31px);
-    top: 31px;
-    overflow: auto;
-    background: #fcfcfc;
-
-    > .Seized-Body {
-      position: absolute;
-      width: 100%;
-
-      > .Raw {
-        position: absolute;
-        width: 100%;
-        height: 50px;
-        top: 0px;
-        display: flex;
-        border-bottom: 1px solid #f5f5f5;
-        transform: translateZ(0);
-
-        > .Cell {
-          position: relative;
-          float: left;
-          height: 50px;
-          line-height: 50px;
-          flex: 1;
-          border-right: 1px solid #f5f5f5;
-          box-sizing: border-box;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: pre;
-          box-sizing: border-box;
-          padding-right: 10px;
-          padding-left: 10px;
-        }
-
-        > .Check-Box {
-          position: relative;
-          float: left;
-          height: 50px;
-          line-height: 50px;
-          text-align: center;
-          width: 30px;
-          border-right: 1px solid #eee;
-          box-sizing: border-box;
-          background: #fff;
-
-          > .Button {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            transform: translateX(-50%) translateY(-50%);
-            box-sizing: border-box;
-
-            > .Surface {
-              width: 10px;
-              height: 10px;
-              position: absolute;
-              background: #2388FF;
-              border-radius: 2px;
-              top: 2px;
-              left: 2px;
-            }
-          }
-        }
-
-      }
-    }
-
-    > .No-Data {
+    > .Holder {
       position: absolute;
       width: auto;
       height: auto;
-      transform: translateX(-50%) translateY(-50%);
       top: 50%;
       left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      display: inline-flex;
+
+      > .Dropdown {
+        position: relative;
+        width: auto;
+        height: 40px;
+        background: #fff;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+        border-radius: 6px 0px 0px 6px;
+        border-right: 0px;
+        padding-left: 10px;
+        padding-right: 20px;
+        line-height: 38px;
+        cursor: pointer;
+
+        > .Icon {
+          position: absolute;
+          pointer-events: none;
+          top: 14px;
+          right: 6px;
+        }
+      }
+
+      > .List {
+        position: absolute;
+        min-width: 128px;
+        height: auto;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        top: 31px;
+        z-index: 1;
+        left: -7px;
+        line-height: 30px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, .1);
+
+        > .Item {
+          position: relative;
+          float: left;
+          width: 100%;
+          height: auto;
+          padding-left: 10px;
+          padding-right: 10px;
+          box-sizing: border-box;
+
+          &:hover {
+            background: #2388FF;
+            color: #fff;
+          }
+        }
+      }
+
+      > .Input {
+        position: relative;
+        width: 400px;
+        height: 40px;
+        background: #fff;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+        border-radius: 0px 6px 6px 0px;
+        padding-left: 10px;
+      }
+    }
+  }
+
+  > .Data {
+    position: absolute;
+    height: calc(100% - 60px);
+    width: 100%;
+    bottom: 0;
+    border-top: 1px solid #ddd;
+    box-sizing: border-box;
+    z-index: 1;
+
+    > .Title {
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      transform: translateZ(0);
+      box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+      z-index: 1;
+
+      > .Check-Box {
+        position: relative;
+        float: left;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        width: 30px;
+        border-right: 1px solid #eee;
+        box-sizing: border-box;
+
+        > .Button {
+          position: absolute;
+          width: 16px;
+          height: 16px;
+          top: 50%;
+          left: 50%;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          cursor: pointer;
+          transform: translateX(-50%) translateY(-50%);
+          box-sizing: border-box;
+
+          > .Surface {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            background: #2388FF;
+            border-radius: 2px;
+            top: 2px;
+            left: 2px;
+          }
+        }
+      }
+
+      > .Cell {
+        position: relative;
+        float: left;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        flex: 1;
+        border-right: 1px solid #eee;
+        box-sizing: border-box;
+      }
+    }
+
+    > .Body {
+      position: absolute;
+      width: 100%;
+      height: calc(100% - 31px);
+      top: 31px;
+      overflow: auto;
+      background: #fcfcfc;
+
+      > .Seized-Body {
+        position: absolute;
+        width: 100%;
+
+        > .Raw {
+          position: absolute;
+          width: 100%;
+          height: 50px;
+          top: 0px;
+          display: flex;
+          border-bottom: 1px solid #f5f5f5;
+          transform: translateZ(0);
+
+          > .Cell {
+            position: relative;
+            float: left;
+            height: 50px;
+            line-height: 50px;
+            flex: 1;
+            border-right: 1px solid #f5f5f5;
+            box-sizing: border-box;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: pre;
+            box-sizing: border-box;
+            padding-right: 10px;
+            padding-left: 10px;
+          }
+
+          > .Check-Box {
+            position: relative;
+            float: left;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            width: 30px;
+            border-right: 1px solid #eee;
+            box-sizing: border-box;
+            background: #fff;
+
+            > .Button {
+              position: absolute;
+              width: 16px;
+              height: 16px;
+              top: 50%;
+              left: 50%;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              cursor: pointer;
+              transform: translateX(-50%) translateY(-50%);
+              box-sizing: border-box;
+
+              > .Surface {
+                width: 10px;
+                height: 10px;
+                position: absolute;
+                background: #2388FF;
+                border-radius: 2px;
+                top: 2px;
+                left: 2px;
+              }
+            }
+          }
+
+        }
+      }
+
+      > .No-Data {
+        position: absolute;
+        width: auto;
+        height: auto;
+        transform: translateX(-50%) translateY(-50%);
+        top: 50%;
+        left: 50%;
+      }
     }
   }
 }

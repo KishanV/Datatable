@@ -10,10 +10,11 @@ export interface Row {
 }
 
 export interface Column {
+    searchable?: boolean;
     id: string,
     label: string,
     type?: 'numeric' | 'string' | 'thumb', // consider default as string.
-    url?: string,// apply url on click
+    url?: string, // apply url on click
     width?: string
 }
 
@@ -23,7 +24,11 @@ export interface DatatableProps {
 }
 
 interface State {
-    isSelectedAll: boolean
+    isSelectedAll: boolean,
+    isDropdownOpen: boolean,
+    filter: 'Filter All' | string,
+    search?: string,
+    filteredList?: Row[]
 }
 
 export const CELL_HEIGHT = 51;
@@ -36,7 +41,9 @@ export class Datatable extends React.Component<DatatableProps, State> {
     };
 
     state: State = {
-        isSelectedAll: false
+        isSelectedAll: false,
+        isDropdownOpen: false,
+        filter: 'All'
     };
 
     constructor(props: DatatableProps) {
@@ -54,10 +61,18 @@ export class Datatable extends React.Component<DatatableProps, State> {
     holderRef: RefObject<Holder> = React.createRef();
 
     body() {
+        let height = 0;
+        if (this.state.filteredList) {
+            height = this.state.filteredList.length * CELL_HEIGHT;
+        } else if (this.props.rows) {
+            height = this.props.rows.length * CELL_HEIGHT;
+        }
+
         return <div ref={this.bodyRef} className={'Body'}>
             {this.props.rows ?
-                <div className={'Seized-Body'} style={{height: `${this.props.rows.length * CELL_HEIGHT}px`}}>
-                    {<Holder ref={this.holderRef} columns={this.props.columns} rows={this.props.rows}/>}
+                <div className={'Seized-Body'} style={{height: `${height}px`}}>
+                    {<Holder ref={this.holderRef} columns={this.props.columns}
+                             rows={this.state.filteredList ? this.state.filteredList : this.props.rows}/>}
                 </div> : <div className={'No-Data'}>No Data</div>}
         </div>
     }
@@ -78,17 +93,110 @@ export class Datatable extends React.Component<DatatableProps, State> {
         });
     };
 
-    render(): React.ReactNode {
-        return <div className={'Datatable'}>
-            <div className={'Title'}>
-                <div className={'Check-Box'}>
-                    <div className={'Button'} onClick={this.onSelectedAll}>
-                        {this.state.isSelectedAll && <div className={'Surface'}/>}
+    runFilter(value: string) {
+        const filteredList = [];
+        const rows = this.props.rows;
+        const columns = this.props.columns;
+        if (rows) {
+            for (let index = 0; index < rows.length; index++) {
+                const row = rows[index];
+                let found = false;
+                for (let num = 0; num < columns.length; num++) {
+                    const column = columns[num];
+                    if (column.searchable) {
+                        const val = row[column.id].toString() as string;
+                        if (val.toLowerCase().startsWith(value)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (found) filteredList.push(row);
+            }
+        }
+        this.resetScroll();
+        if (filteredList.length !== 0) {
+            this.setState({
+                filteredList
+            });
+        } else if (this.state.filteredList !== undefined) {
+            this.setState({
+                filteredList: undefined
+            });
+        }
+    }
+
+    resetScroll() {
+        this.visibleItem.start = 0;
+        this.visibleItem.end = 200;
+        if (this.holderRef.current) {
+            this.holderRef.current.state.visibleItem = this.visibleItem;
+        }
+    }
+
+    search() {
+        return <div className={'Search'}>
+            <div className={'Holder'}>
+                <div className={'Dropdown'} onClick={event1 => {
+                    this.setState({
+                        isDropdownOpen: !this.state.isDropdownOpen
+                    })
+                }}>
+                    Filter {this.state.filter}
+                    <div className={'Icon'}>
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect y="4.24268" width="1" height="6" transform="rotate(-45 0 4.24268)" fill="#333333"/>
+                            <rect x="7.77817" y="3.53552" width="1" height="6" transform="rotate(45 7.77817 3.53552)"
+                                  fill="#333333"/>
+                        </svg>
                     </div>
                 </div>
-                {this.titleBar()}
+                <input className={'Input'} value={this.state.search} onChange={event => {
+                    const str = event.target.value.trim().toLowerCase();
+                    setTimeout(() => {
+                        this.runFilter(str);
+                    }, 100)
+                }}></input>
+                {this.state.isDropdownOpen && <div className={'List'}>
+                    <div onClick={event1 => {
+                        this.setState({
+                            filter: 'All',
+                            isDropdownOpen: false,
+                            filteredList: undefined
+                        })
+                    }} className={'Item'}>All
+                    </div>
+                    {this.props.columns.map(value => {
+                        if (value.searchable !== true) return;
+                        return <div key={value.label} onClick={event1 => {
+                            this.setState({
+                                filter: value.label,
+                                isDropdownOpen: false,
+                                filteredList: undefined
+                            })
+                        }} className={'Item'}>{
+                            value.label
+                        }</div>
+                    })}
+                </div>}
             </div>
-            {this.body()}
+        </div>;
+    }
+
+    render(): React.ReactNode {
+        return <div className={'Datatable'}>
+            {this.search()}
+            <div className={'Data'}>
+                <div className={'Title'}>
+                    <div className={'Check-Box'}>
+                        <div className={'Button'} onClick={this.onSelectedAll}>
+                            {this.state.isSelectedAll && <div className={'Surface'}/>}
+                        </div>
+                    </div>
+                    {this.titleBar()}
+                </div>
+                {this.body()}
+            </div>
         </div>;
     }
 

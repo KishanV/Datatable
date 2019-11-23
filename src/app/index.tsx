@@ -33,10 +33,12 @@ export class App extends React.Component<any, State> {
                     label: 'Album'
                 }, {
                     id: 'id',
-                    label: 'No'
+                    label: 'No',
+                    searchable: true
                 }, {
                     id: 'title',
-                    label: 'Title'
+                    label: 'Title',
+                    searchable: true
                 }, {
                     id: 'thumbnailUrl',
                     label: 'Thumbnail'
