@@ -23,6 +23,7 @@ interface State {
 }
 
 const CELL_HEIGHT = 41;
+const CELL_COUNT = 200;
 
 export class Datatable extends React.Component<Props, State> {
     state: State = {
@@ -46,20 +47,22 @@ export class Datatable extends React.Component<Props, State> {
     data() {
         const columns = this.props.columns;
         const rows = this.props.rows;
-        const visibleItem = this.state.visibleItem;
-        const list = [];
-        for (let index = visibleItem.start; index < visibleItem.end; index++) {
-            const rowValue = rows[index];
-            const rawTop = index * CELL_HEIGHT;
-            list.push(
-                <div key={index} className={'Raw'} style={{top: `${rawTop}px`}}>
-                    {columns.map((value1, index1) => {
-                        return <div key={value1.label} className={'Cell'}>{rowValue[value1.id]}</div>
-                    })}
-                </div>
-            );
+        if (rows) {
+            const visibleItem = this.state.visibleItem;
+            const list = [];
+            for (let index = visibleItem.start; index < visibleItem.end; index++) {
+                const rowValue = rows[index];
+                const rawTop = index * CELL_HEIGHT;
+                list.push(
+                    <div key={index} className={'Raw'} style={{top: `${rawTop}px`}}>
+                        {columns.map((value1, index1) => {
+                            return <div key={value1.label} className={'Cell'}>{rowValue[value1.id]}</div>
+                        })}
+                    </div>
+                );
+            }
+            return list;
         }
-        return list;
     }
 
     bodyRef: RefObject<HTMLDivElement> = React.createRef();
@@ -80,5 +83,53 @@ export class Datatable extends React.Component<Props, State> {
             </div>
             {this.body()}
         </div>;
+    }
+
+    elementBound?: ClientRect;
+    onScroll = (evt: MouseEvent) => {
+        const element = this.bodyRef.current;
+        if (this.elementBound && element instanceof HTMLDivElement) {
+            const visibleItem = this.state.visibleItem;
+            const startPoint = visibleItem.start * CELL_HEIGHT;
+            const endPoint = visibleItem.end * CELL_HEIGHT;
+            const scrollTop = element.scrollTop;
+            const scrollBottom = scrollTop + this.elementBound.height;
+            if (scrollBottom > endPoint && this.props.rows) {
+                const selectedItemIndex = Math.floor(scrollBottom / CELL_HEIGHT);
+                const newStart = selectedItemIndex - 100;
+                const newEnd = selectedItemIndex + 100;
+                this.state.visibleItem.start = newStart < 0 ? 0 : newStart;
+                this.state.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length : newEnd;
+                this.setState({
+                    visibleItem: this.state.visibleItem
+                });
+            }
+            if (scrollBottom - this.elementBound.height < startPoint && this.props.rows) {
+                const selectedItemIndex = Math.floor(scrollBottom / CELL_HEIGHT);
+                const newStart = selectedItemIndex - 100;
+                const newEnd = selectedItemIndex + 100;
+                this.state.visibleItem.start = newStart < 0 ? 0 : newStart;
+                this.state.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length : newEnd;
+                this.setState({
+                    visibleItem: this.state.visibleItem
+                });
+            }
+        }
+    };
+
+    componentDidMount(): void {
+        if (this.bodyRef.current) {
+            const element = this.bodyRef.current;
+            this.elementBound = element.getBoundingClientRect();
+            element.addEventListener('scroll', this.onScroll as any);
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.bodyRef.current) {
+            const element = this.bodyRef.current;
+            this.elementBound = undefined;
+            element.removeEventListener('scroll', this.onScroll as any);
+        }
     }
 }
