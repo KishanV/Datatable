@@ -4,7 +4,9 @@ import {RefObject} from "react";
 import {Holder} from "./holder";
 
 export interface Row {
-    [index: string]: string | number
+    isSelected?: any | boolean;
+
+    [index: string]: string | number | boolean
 }
 
 export interface Column {
@@ -21,16 +23,20 @@ export interface DatatableProps {
 }
 
 interface State {
-
+    isSelectedAll: boolean
 }
 
-export const CELL_HEIGHT = 41;
+export const CELL_HEIGHT = 51;
 export const CELL_COUNT = 100;
 
-export class Datatable extends React.Component<DatatableProps, any> {
+export class Datatable extends React.Component<DatatableProps, State> {
     visibleItem = {
         start: 0,
         end: 200
+    };
+
+    state: State = {
+        isSelectedAll: false
     };
 
     constructor(props: DatatableProps) {
@@ -56,9 +62,30 @@ export class Datatable extends React.Component<DatatableProps, any> {
         </div>
     }
 
+    onSelectedAll = () => {
+        const rows = this.props.rows;
+        if (this.state.isSelectedAll && rows) {
+            for (let index = 0; index < rows.length; index++) {
+                delete rows[index].isSelected;
+            }
+        } else if (rows) {
+            for (let index = 0; index < rows.length; index++) {
+                rows[index].isSelected = true;
+            }
+        }
+        this.setState({
+            isSelectedAll: !this.state.isSelectedAll
+        });
+    };
+
     render(): React.ReactNode {
         return <div className={'Datatable'}>
             <div className={'Title'}>
+                <div className={'Check-Box'}>
+                    <div className={'Button'} onClick={this.onSelectedAll}>
+                        {this.state.isSelectedAll && <div className={'Surface'}/>}
+                    </div>
+                </div>
                 {this.titleBar()}
             </div>
             {this.body()}
@@ -101,19 +128,22 @@ export class Datatable extends React.Component<DatatableProps, any> {
         }
     };
 
+    onResize = () => {
+        this.loadBound();
+    };
+
+    loadBound() {
+        if (this.bodyRef.current) this.elementBound = this.bodyRef.current.getBoundingClientRect();
+    }
+
     componentDidMount(): void {
-        if (this.bodyRef.current) {
-            const element = this.bodyRef.current;
-            this.elementBound = element.getBoundingClientRect();
-            element.addEventListener('scroll', this.onScroll as any);
-        }
+        window.addEventListener('onresize', this.onResize);
+        this.loadBound();
+        if (this.bodyRef.current) this.bodyRef.current.addEventListener('scroll', this.onScroll as any);
     }
 
     componentWillUnmount(): void {
-        if (this.bodyRef.current) {
-            const element = this.bodyRef.current;
-            this.elementBound = undefined;
-            element.removeEventListener('scroll', this.onScroll as any);
-        }
+        window.removeEventListener('onresize', this.onResize);
+        if (this.bodyRef.current) this.bodyRef.current.removeEventListener('scroll', this.onScroll as any);
     }
 }

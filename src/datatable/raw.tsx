@@ -13,10 +13,24 @@ export class Raw extends React.Component<Props, any> {
         super(props);
     }
 
+    onSelected = () => {
+        if (this.props.value.isSelected) {
+            delete this.props.value.isSelected
+        } else {
+            this.props.value.isSelected = true
+        }
+        this.setState({});
+    };
+
     render(): React.ReactNode {
         return <div className={'Raw'} style={{top: `${this.props.top}px`}}>
-            {this.props.columns.map((value1, index1) => {
-                return <div key={value1.label} className={'Cell'}>{this.props.value[value1.id]}</div>
+            <div className={'Check-Box'}>
+                <div className={'Button'} onClick={this.onSelected}>
+                    {this.props.value.isSelected && <div className={'Surface'}/>}
+                </div>
+            </div>
+            {this.props.columns.map((value, index1) => {
+                return <div key={value.label} className={'Cell'}>{this.props.value[value.id]}</div>
             })}
         </div>;
     }
