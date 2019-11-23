@@ -18,3 +18,9 @@ body {
     z-index: 1;
   }
 }
+
+@font-face {
+  font-family: 'MyWebFont';
+  src: url('../fonts/roboto-condensed-v16-latin-regular.woff') format('woff'),
+       url('../fonts/roboto-condensed-v16-latin-regular.woff2') format('woff2')
+}

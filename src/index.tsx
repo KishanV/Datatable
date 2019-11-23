@@ -2,7 +2,6 @@ import './index.scss';
 import {render} from 'react-dom'
 import React = require("react");
 import {App} from "./app";
-import "./settings.scss";
 
 window.oncontextmenu = (e: MouseEvent) => {
     return e.target instanceof HTMLInputElement && e.target.type == 'text';
