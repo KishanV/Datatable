@@ -30,7 +30,12 @@ export class Raw extends React.Component<Props, any> {
                 </div>
             </div>
             {this.props.columns.map((value, index1) => {
-                return <div key={value.label} className={'Cell'}>{this.props.value[value.id]}</div>
+                return <div key={value.label}
+                            className={(value.type ? value.type : 'Cell')}>
+                    {value.type === 'thumb' &&
+                    <div style={{backgroundImage: `url(${this.props.value[value.id]})`}} className={'image'}/>}
+                    {value.type ? '' : this.props.value[value.id]}
+                </div>
             })}
         </div>;
     }

@@ -29,6 +29,10 @@ export class App extends React.Component<any, State> {
         return <div className={'App'}>
             <Datatable
                 columns={[{
+                    id: 'thumbnailUrl',
+                    label: 'Thumbnail',
+                    type: 'thumb'
+                }, {
                     id: 'albumId',
                     label: 'Album'
                 }, {
@@ -39,9 +43,6 @@ export class App extends React.Component<any, State> {
                     id: 'title',
                     label: 'Title',
                     searchable: true
-                }, {
-                    id: 'thumbnailUrl',
-                    label: 'Thumbnail'
                 }]}
                 rows={this.state.date}/>
         </div>;

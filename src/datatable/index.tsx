@@ -53,7 +53,8 @@ export class Datatable extends React.Component<DatatableProps, State> {
     titleBar() {
         const columns = this.props.columns;
         return columns.map(value => {
-            return <div key={value.label} className={'Cell'}>{value.label}</div>
+            return <div key={value.label}
+                        className={(value.type ? value.type : 'Cell')}>{value.type ? '' : value.label}</div>
         });
     }
 
