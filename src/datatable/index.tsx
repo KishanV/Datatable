@@ -23,6 +23,7 @@ export interface DatatableProps {
     rows?: Row[];
     onSelectionChange?: (selection: number[] | 'All',) => void;
     onRowClick?: (rowData: Row, rowIndex: number) => void
+    onSearch?: (rowData?: Row[]) => void
 }
 
 interface State {
@@ -53,11 +54,28 @@ export class Datatable extends React.Component<DatatableProps, State> {
         super(props);
     }
 
+    getCellClass(type?: any) {
+        if (type === 'thumb') {
+            return type;
+        } else {
+            return 'Cell'
+        }
+    }
+
+    getCellLabel(label: string, type?: string) {
+        if (type === 'thumb') {
+            return '';
+        } else {
+            return label;
+        }
+    }
+
+
     titleBar() {
         const columns = this.props.columns;
         return columns.map(value => {
             return <div key={value.label}
-                        className={(value.type ? value.type : 'Cell')}>{value.type ? '' : value.label}</div>
+                        className={this.getCellClass(value.type)}>{this.getCellLabel(value.label, value.type)}</div>
         });
     }
 
@@ -80,7 +98,11 @@ export class Datatable extends React.Component<DatatableProps, State> {
         return <div ref={this.bodyRef} className={'Body'}>
             {this.props.rows ?
                 <div className={'Seized-Body'} style={{height: `${height}px`}}>
-                    {<Holder selectedIndex={this.selectedIndex} ref={this.holderRef} columns={this.props.columns}
+                    {<Holder selectedIndex={this.selectedIndex}
+                             onRowClick={this.props.onRowClick}
+                             onSelectionChange={this.props.onSelectionChange}
+                             ref={this.holderRef}
+                             columns={this.props.columns}
                              rows={this.state.filteredList ? this.state.filteredList : this.props.rows}/>}
                 </div> : <div className={'No-Data'}>Loading...</div>}
         </div>
@@ -130,11 +152,15 @@ export class Datatable extends React.Component<DatatableProps, State> {
             this.setState({
                 filteredList,
                 search: value
+            }, () => {
+                if (this.props.onSearch) this.props.onSearch(this.state.filteredList);
             });
         } else {
             this.setState({
                 filteredList: undefined,
                 search: undefined
+            }, () => {
+                if (this.props.onSearch) this.props.onSearch(this.state.filteredList);
             });
         }
     }
@@ -176,11 +202,11 @@ export class Datatable extends React.Component<DatatableProps, State> {
                         </svg>
                     </div>
                 </div>
-                <input className={'Input'} value={this.state.search} onChange={event => {
+                <input placeholder={'Search Item'} className={'Input'} value={this.state.search} onChange={event => {
                     const str = event.target.value.trim().toLowerCase();
                     setTimeout(() => {
                         this.runFilter(str);
-                    }, 100)
+                    }, 100);
                 }}/>
                 {this.state.isDropdownOpen && <div className={'List'}>
                     <div onClick={event1 => {

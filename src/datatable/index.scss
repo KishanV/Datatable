@@ -39,6 +39,7 @@
         padding-right: 20px;
         line-height: 38px;
         cursor: pointer;
+        white-space: pre;
 
         > .Icon {
           position: absolute;
@@ -208,9 +209,13 @@
             box-sizing: border-box;
             padding-right: 10px;
             padding-left: 10px;
+
+            &.Numeric {
+              text-align: right;
+            }
           }
 
-          > .thumb {
+          > .Thumb {
             position: relative;
             float: left;
             height: 50px;

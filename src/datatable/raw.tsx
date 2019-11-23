@@ -33,6 +33,32 @@ export class Raw extends React.Component<Props, any> {
         this.setState({});
     };
 
+    cell(value: Column) {
+        if (value.type === 'thumb') {
+            return <div key={value.label}
+                        className={'Thumb'}>
+                <div style={{backgroundImage: `url(${this.props.value[value.id]})`}} className={'image'}/>
+            </div>
+        } else if (value.type === 'numeric') {
+            return <div key={value.label}
+                        className={'Cell Numeric'}>
+                {this.props.value[value.id]}
+            </div>
+        } else {
+            return <div key={value.label}
+                        className={'Cell'}>
+                {this.props.value[value.id]}
+            </div>
+        }
+
+    }
+
+    list() {
+        return this.props.columns.map((value, index1) => {
+            return this.cell(value)
+        })
+    }
+
     render(): React.ReactNode {
         return <div className={'Raw'} onClick={event1 => {
             if (this.props.onRowClick) this.props.onRowClick(this.props.value, this.props.index);
@@ -42,14 +68,7 @@ export class Raw extends React.Component<Props, any> {
                     {this.props.value.isSelected && <div className={'Surface'}/>}
                 </div>
             </div>
-            {this.props.columns.map((value, index1) => {
-                return <div key={value.label}
-                            className={(value.type ? value.type : 'Cell')}>
-                    {value.type === 'thumb' &&
-                    <div style={{backgroundImage: `url(${this.props.value[value.id]})`}} className={'image'}/>}
-                    {value.type ? '' : this.props.value[value.id]}
-                </div>
-            })}
+            {this.list()}
         </div>;
     }
 }

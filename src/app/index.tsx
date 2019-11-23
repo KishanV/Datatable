@@ -34,17 +34,29 @@ export class App extends React.Component<any, State> {
                     type: 'thumb'
                 }, {
                     id: 'albumId',
-                    label: 'Album'
+                    label: 'Album No',
+                    type: 'numeric'
                 }, {
                     id: 'id',
                     label: 'No',
-                    searchable: true
+                    searchable: true,
+                    type: 'numeric'
                 }, {
                     id: 'title',
                     label: 'Title',
                     searchable: true
                 }]}
-                rows={this.state.date}/>
+                rows={this.state.date}
+                onSelectionChange={selection => {
+                    console.log('onSelectionChange =>', selection)
+                }}
+                onRowClick={(data, rowIndex) => {
+                    console.log('onRowClick => data =', data, 'index =', rowIndex)
+                }}
+                onSearch={data => {
+                    console.log('onSearch => ', data)
+                }}
+            />
         </div>;
     }
 }
