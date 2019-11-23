@@ -38,7 +38,7 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
-    "sass-lint-auto-fix": "^0.17.0",
+    "sass-lint-auto-fix": "0.18.5",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
     "svg-inline-loader": "^0.8.0",
