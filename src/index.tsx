@@ -1,5 +1,4 @@
 import './index.scss';
-import './lib/index.scss';
 import {render} from 'react-dom'
 import React = require("react");
 import {App} from "./app";
