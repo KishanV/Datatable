@@ -3,9 +3,26 @@ import './index.scss';
 import {hot} from 'react-hot-loader/root';
 import {Datatable} from "../datatable";
 
-export class App extends React.Component<any, any> {
+interface State {
+    date?: any
+}
+
+export class App extends React.Component<any, State> {
+    state: State = {};
+
     constructor(props: any) {
         super(props);
+        this.loadData();
+    }
+
+    async loadData() {
+        let response = await fetch("https://jsonplaceholder.typicode.com/photos");
+        if (response.ok) {
+            let json = await response.json();
+            this.setState({
+                date: json
+            })
+        }
     }
 
     render() {
@@ -24,36 +41,7 @@ export class App extends React.Component<any, any> {
                     id: 'thumbnailUrl',
                     label: 'Thumbnail'
                 }]}
-                rows={[
-                    {
-                        "albumId": 1,
-                        "id": 1,
-                        "title": "accusamus beatae ad facilis cum similique qui sunt",
-                        "url": "https://via.placeholder.com/600/92c952",
-                        "thumbnailUrl": "https://via.placeholder.com/150/92c952"
-                    },
-                    {
-                        "albumId": 1,
-                        "id": 2,
-                        "title": "reprehenderit est deserunt velit ipsam",
-                        "url": "https://via.placeholder.com/600/771796",
-                        "thumbnailUrl": "https://via.placeholder.com/150/771796"
-                    },
-                    {
-                        "albumId": 1,
-                        "id": 3,
-                        "title": "officia porro iure quia iusto qui ipsa ut modi",
-                        "url": "https://via.placeholder.com/600/24f355",
-                        "thumbnailUrl": "https://via.placeholder.com/150/24f355"
-                    },
-                    {
-                        "albumId": 1,
-                        "id": 4,
-                        "title": "culpa odio esse rerum omnis laboriosam voluptate repudiandae",
-                        "url": "https://via.placeholder.com/600/d32776",
-                        "thumbnailUrl": "https://via.placeholder.com/150/d32776"
-                    }
-                ]}/>
+                rows={this.state.date}/>
         </div>;
     }
 }

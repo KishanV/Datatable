@@ -8,4 +8,69 @@
   box-sizing: border-box;
   top: 10px;
   left: 10px;
+
+  > .Title {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+
+    > .Cell {
+      position: relative;
+      float: left;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      flex: 1;
+      border-right: 1px solid #eee;
+      box-sizing: border-box;
+    }
+  }
+
+  > .Body {
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 31px);
+    top: 31px;
+    overflow: auto;
+
+    > .Seized-Body {
+      position: absolute;
+      width: 100%;
+      > .Raw {
+        position: absolute;
+        width: 100%;
+        height: 40px;
+        top: 0px;
+        display: flex;
+        border-bottom: 1px solid #f5f5f5;
+
+        > .Cell {
+          position: relative;
+          float: left;
+          height: 40px;
+          line-height: 40px;
+          flex: 1;
+          border-right: 1px solid #f5f5f5;
+          box-sizing: border-box;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: pre;
+          box-sizing: border-box;
+          padding-right: 10px;
+          padding-left: 10px;
+        }
+      }
+    }
+
+    > .No-Data {
+      position: absolute;
+      width: auto;
+      height: auto;
+      transform: translateX(-50%) translateY(-50%);
+      top: 50%;
+      left: 50%;
+    }
+  }
 }
