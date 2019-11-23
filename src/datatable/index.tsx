@@ -26,7 +26,7 @@ export interface DatatableProps {
 interface State {
     isSelectedAll: boolean,
     isDropdownOpen: boolean,
-    filter: 'Filter All' | string,
+    filter: 'All' | string,
     search?: string,
     filteredList?: Row[]
 }
@@ -61,6 +61,11 @@ export class Datatable extends React.Component<DatatableProps, State> {
     holderRef: RefObject<Holder> = React.createRef();
 
     body() {
+        if (this.state.filteredList && this.state.filteredList.length === 0) {
+            return <div ref={this.bodyRef} className={'Body'}>
+                <div className={'No-Data'}>No Any Data Found.</div>
+            </div>
+        }
         let height = 0;
         if (this.state.filteredList) {
             height = this.state.filteredList.length * CELL_HEIGHT;
@@ -73,7 +78,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 <div className={'Seized-Body'} style={{height: `${height}px`}}>
                     {<Holder ref={this.holderRef} columns={this.props.columns}
                              rows={this.state.filteredList ? this.state.filteredList : this.props.rows}/>}
-                </div> : <div className={'No-Data'}>No Data</div>}
+                </div> : <div className={'No-Data'}>Loading...</div>}
         </div>
     }
 
@@ -103,7 +108,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 let found = false;
                 for (let num = 0; num < columns.length; num++) {
                     const column = columns[num];
-                    if (column.searchable) {
+                    if (column.searchable && (this.state.filter === 'All' || this.state.filter === column.label)) {
                         const val = row[column.id].toString() as string;
                         if (val.toLowerCase().startsWith(value)) {
                             found = true;
@@ -115,13 +120,15 @@ export class Datatable extends React.Component<DatatableProps, State> {
             }
         }
         this.resetScroll();
-        if (filteredList.length !== 0) {
+        if (value !== '') {
             this.setState({
-                filteredList
+                filteredList,
+                search: value
             });
-        } else if (this.state.filteredList !== undefined) {
+        } else {
             this.setState({
-                filteredList: undefined
+                filteredList: undefined,
+                search: undefined
             });
         }
     }
@@ -132,6 +139,18 @@ export class Datatable extends React.Component<DatatableProps, State> {
         if (this.holderRef.current) {
             this.holderRef.current.state.visibleItem = this.visibleItem;
         }
+    }
+
+    onDropdown(type: string) {
+        this.setState({
+            filter: type,
+            isDropdownOpen: false,
+            filteredList: undefined
+        }, () => {
+            if (this.state.search) {
+                this.runFilter(this.state.search);
+            }
+        });
     }
 
     search() {
@@ -156,24 +175,16 @@ export class Datatable extends React.Component<DatatableProps, State> {
                     setTimeout(() => {
                         this.runFilter(str);
                     }, 100)
-                }}></input>
+                }}/>
                 {this.state.isDropdownOpen && <div className={'List'}>
                     <div onClick={event1 => {
-                        this.setState({
-                            filter: 'All',
-                            isDropdownOpen: false,
-                            filteredList: undefined
-                        })
+                        this.onDropdown('All')
                     }} className={'Item'}>All
                     </div>
                     {this.props.columns.map(value => {
                         if (value.searchable !== true) return;
                         return <div key={value.label} onClick={event1 => {
-                            this.setState({
-                                filter: value.label,
-                                isDropdownOpen: false,
-                                filteredList: undefined
-                            })
+                            this.onDropdown(value.label);
                         }} className={'Item'}>{
                             value.label
                         }</div>
