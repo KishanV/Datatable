@@ -1,10 +1,14 @@
 import * as React from "react";
-import {CELL_HEIGHT, Column, DatatableProps, Row} from "./index";
+import {Column, Row} from "./index";
 
 interface Props {
+    selectedIndex: number[]
     columns: Column[],
     top: number,
-    value: Row
+    value: Row,
+    index: number,
+    onSelectionChange?: (selection: number[] | 'All') => void;
+    onRowClick?: (rowData: Row, rowIndex: number) => void
 }
 
 export class Raw extends React.Component<Props, any> {
@@ -15,15 +19,24 @@ export class Raw extends React.Component<Props, any> {
 
     onSelected = () => {
         if (this.props.value.isSelected) {
-            delete this.props.value.isSelected
+            const indexOf = this.props.selectedIndex.indexOf(this.props.index);
+            if (indexOf !== -1) {
+                this.props.selectedIndex.splice(indexOf, 1);
+                if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
+            }
+            delete this.props.value.isSelected;
         } else {
-            this.props.value.isSelected = true
+            this.props.value.isSelected = true;
+            this.props.selectedIndex.push(this.props.index);
+            if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
         }
         this.setState({});
     };
 
     render(): React.ReactNode {
-        return <div className={'Raw'} style={{top: `${this.props.top}px`}}>
+        return <div className={'Raw'} onClick={event1 => {
+            if (this.props.onRowClick) this.props.onRowClick(this.props.value, this.props.index);
+        }} style={{top: `${this.props.top}px`}}>
             <div className={'Check-Box'}>
                 <div className={'Button'} onClick={this.onSelected}>
                     {this.props.value.isSelected && <div className={'Surface'}/>}

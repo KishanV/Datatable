@@ -190,6 +190,10 @@
           border-bottom: 1px solid #f5f5f5;
           transform: translateZ(0);
 
+          &:hover {
+            background: #fff;
+          }
+
           > .Cell {
             position: relative;
             float: left;

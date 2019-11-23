@@ -1,7 +1,10 @@
 import * as React from "react";
-import {CELL_HEIGHT, DatatableProps, Row} from "./index";
+import {CELL_HEIGHT, DatatableProps} from "./index";
 import {Raw} from "./raw";
 
+interface Props extends DatatableProps {
+    selectedIndex: number[]
+}
 
 interface State {
     visibleItem: {
@@ -10,7 +13,7 @@ interface State {
     }
 }
 
-export class Holder extends React.Component<DatatableProps, State> {
+export class Holder extends React.Component<Props, State> {
     state: State = {
         visibleItem: {
             start: 0,
@@ -18,7 +21,7 @@ export class Holder extends React.Component<DatatableProps, State> {
         }
     };
 
-    constructor(props: DatatableProps) {
+    constructor(props: Props) {
         super(props);
     }
 
@@ -32,7 +35,16 @@ export class Holder extends React.Component<DatatableProps, State> {
             for (let index = visibleItem.start; index < end; index++) {
                 const rowValue = rows[index];
                 const rawTop = index * CELL_HEIGHT;
-                list.push(<Raw key={index.toString()} value={rowValue} top={rawTop} columns={this.props.columns}/>)
+                list.push(<Raw selectedIndex={this.props.selectedIndex}
+                               index={index}
+                               key={index.toString()}
+                               value={rowValue}
+                               top={rawTop}
+                               columns={this.props.columns}
+                               onRowClick={this.props.onRowClick}
+                               onSelectionChange={this.props.onSelectionChange}
+                    />
+                )
             }
             return list;
         }

@@ -21,6 +21,8 @@ export interface Column {
 export interface DatatableProps {
     columns: Column[];
     rows?: Row[];
+    onSelectionChange?: (selection: number[] | 'All',) => void;
+    onRowClick?: (rowData: Row, rowIndex: number) => void
 }
 
 interface State {
@@ -40,6 +42,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         end: 200
     };
 
+    selectedIndex: number[] = [];
     state: State = {
         isSelectedAll: false,
         isDropdownOpen: false,
@@ -77,7 +80,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         return <div ref={this.bodyRef} className={'Body'}>
             {this.props.rows ?
                 <div className={'Seized-Body'} style={{height: `${height}px`}}>
-                    {<Holder ref={this.holderRef} columns={this.props.columns}
+                    {<Holder selectedIndex={this.selectedIndex} ref={this.holderRef} columns={this.props.columns}
                              rows={this.state.filteredList ? this.state.filteredList : this.props.rows}/>}
                 </div> : <div className={'No-Data'}>Loading...</div>}
         </div>
@@ -85,6 +88,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
 
     onSelectedAll = () => {
         const rows = this.props.rows;
+        this.selectedIndex = [];
         if (this.state.isSelectedAll && rows) {
             for (let index = 0; index < rows.length; index++) {
                 delete rows[index].isSelected;
@@ -97,6 +101,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         this.setState({
             isSelectedAll: !this.state.isSelectedAll
         });
+        if (this.props.onSelectionChange) this.props.onSelectionChange('All');
     };
 
     runFilter(value: string) {
