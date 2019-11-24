@@ -12,18 +12,18 @@ export interface Row {
 export interface Column {
     searchable?: boolean;
     id: string,
-    label: string,
+    label: string, // display name on user interface.
     type?: 'numeric' | 'string' | 'thumb', // consider default as string.
     url?: string, // apply url on click
-    width?: string
+    width?: string // css style based width for column.
 }
 
 export interface DatatableProps {
-    columns: Column[];
-    rows?: Row[];
-    onSelectionChange?: (selection: number[] | 'All',) => void;
-    onRowClick?: (rowData: Row, rowIndex: number) => void
-    onSearch?: (rowData?: Row[]) => void
+    columns: Column[]; // columns for table.
+    rows?: Row[]; // actual data will sen via rows.
+    onSelectionChange?: (selection: number[] | 'All',) => void; // will be callback on selection changes if implemented.
+    onRowClick?: (rowData: Row, rowIndex: number) => void // will be callback on onRow clicked if implemented.
+    onSearch?: (rowData?: Row[]) => void // will be callback on search with collection of searched item as array.
 }
 
 interface State {
@@ -38,12 +38,15 @@ export const CELL_HEIGHT = 51;
 export const CELL_COUNT = 100;
 
 export class Datatable extends React.Component<DatatableProps, State> {
+    //visibleItem and selectedIndex are separate from state because no need to render on change for performance management.
     visibleItem = {
         start: 0,
         end: 200
     };
 
+    // for cache selection index for quickly replying in callback.
     selectedIndex: number[] = [];
+
     state: State = {
         isSelectedAll: false,
         isDropdownOpen: false,
@@ -54,6 +57,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         super(props);
     }
 
+    // simple utility to generate cell type css class.
     getCellClass(type?: any) {
         if (type === 'thumb') {
             return type;
@@ -62,6 +66,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         }
     }
 
+    // simple utility to render cell label.
     getCellLabel(label: string, type?: string) {
         if (type === 'thumb') {
             return '';
@@ -79,15 +84,18 @@ export class Datatable extends React.Component<DatatableProps, State> {
         });
     }
 
+    // create direct references for body and holder DOM element for later use for performance tuning and only needed part rendering.
     bodyRef: RefObject<HTMLDivElement> = React.createRef();
     holderRef: RefObject<Holder> = React.createRef();
 
     body() {
+        // when user is is using filter and result will be empty then show 'No Any Data Found.' message.
         if (this.state.filteredList && this.state.filteredList.length === 0) {
             return <div ref={this.bodyRef} className={'Body'}>
                 <div className={'No-Data'}>No Any Data Found.</div>
             </div>
         }
+
         let height = 0;
         if (this.state.filteredList) {
             height = this.state.filteredList.length * CELL_HEIGHT;
@@ -95,6 +103,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
             height = this.props.rows.length * CELL_HEIGHT;
         }
 
+        // show 'Loading...' while fetching data from server and then render holder with loaded data.
         return <div ref={this.bodyRef} className={'Body'}>
             {this.props.rows ?
                 <div className={'Seized-Body'} style={{height: `${height}px`}}>
@@ -111,18 +120,25 @@ export class Datatable extends React.Component<DatatableProps, State> {
     onSelectedAll = () => {
         const rows = this.props.rows;
         this.selectedIndex = [];
+
+        // remove all selections on when clicked checkbox in title bar when it is already selected.
         if (this.state.isSelectedAll && rows) {
             for (let index = 0; index < rows.length; index++) {
-                delete rows[index].isSelected;
+                delete rows[index].isSelected; // use delete to free up memory and remove selection.
             }
         } else if (rows) {
             for (let index = 0; index < rows.length; index++) {
-                rows[index].isSelected = true;
+                rows[index].isSelected = true; // assign true to isSelected for later use in quick render raw via its own component.
+                this.selectedIndex.push(index); // pushed index in cache.
             }
         }
+
+        // finally all computation done toggle selection and render entire component again
         this.setState({
             isSelectedAll: !this.state.isSelectedAll
         });
+
+        //called back for onSelectionChange listing.
         if (this.props.onSelectionChange) this.props.onSelectionChange('All');
     };
 
@@ -243,15 +259,18 @@ export class Datatable extends React.Component<DatatableProps, State> {
         </div>;
     }
 
-    elementBound?: ClientRect;
+    elementBound?: ClientRect; // store element bound for later use.
     onScroll = (evt: MouseEvent) => {
         const element = this.bodyRef.current;
         if (this.elementBound && element instanceof HTMLDivElement) {
             const visibleItem = this.visibleItem;
-            const startPoint = visibleItem.start * CELL_HEIGHT;
-            const endPoint = visibleItem.end * CELL_HEIGHT;
+            const startPoint = visibleItem.start * CELL_HEIGHT; // calculate starting pixel as point.
+            const endPoint = visibleItem.end * CELL_HEIGHT; // calculate ending pixel as point.
             const scrollTop = element.scrollTop;
             const scrollBottom = scrollTop + this.elementBound.height;
+
+            // check if item need to be refresh from bottom visibility point of view.
+            // than sync holder state directly for avoid render itself and render only needed component.
             if (scrollBottom > endPoint && this.props.rows) {
                 const selectedItemIndex = Math.floor(scrollBottom / CELL_HEIGHT);
                 const newStart = selectedItemIndex - 100;
@@ -264,6 +283,8 @@ export class Datatable extends React.Component<DatatableProps, State> {
                     })
                 }
             }
+
+            // check if item need to be refresh from top visibility point of view.
             if (scrollBottom - this.elementBound.height < startPoint && this.props.rows) {
                 const selectedItemIndex = Math.floor(scrollBottom / CELL_HEIGHT);
                 const newStart = selectedItemIndex - 100;

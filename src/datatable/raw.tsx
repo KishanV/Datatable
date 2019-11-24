@@ -11,14 +11,17 @@ interface Props {
     onRowClick?: (rowData: Row, rowIndex: number) => void
 }
 
+// created separate component for each row to optimize render process.
 export class Raw extends React.Component<Props, any> {
 
     constructor(props: Props) {
         super(props);
     }
 
+    // selection utility and rendering functionality.
     onSelected = () => {
         if (this.props.value.isSelected) {
+            //called back on selection change if index found in cache and after removed from it.
             const indexOf = this.props.selectedIndex.indexOf(this.props.index);
             if (indexOf !== -1) {
                 this.props.selectedIndex.splice(indexOf, 1);
@@ -27,6 +30,7 @@ export class Raw extends React.Component<Props, any> {
             delete this.props.value.isSelected;
         } else {
             this.props.value.isSelected = true;
+            //called back on selection change after cache index.
             this.props.selectedIndex.push(this.props.index);
             if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
         }
