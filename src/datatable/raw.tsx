@@ -40,20 +40,22 @@ export class Raw extends React.Component<Props, any> {
     // render data according to type of cell. if type is thumb then render thumbnail and use id value as url.
     // if type is numeric then render give text align to right.
     // if type is undefined then render as normal text.
+    // dynamic width implementation by give parameter value.
     cell(value: Column) {
+        const width = value.width;
         if (value.type === 'thumb') {
             return <div key={value.label}
                         className={'Thumb'}>
                 <div style={{backgroundImage: `url(${this.props.value[value.id]})`}} className={'image'}/>
             </div>
         } else if (value.type === 'numeric') {
-            return <div key={value.label}
-                        className={'Cell Numeric'}>
+            return <div key={value.label} style={width ? {width: width} : {}}
+                        className={(width ? 'Cell-Sized Numeric' : 'Cell Numeric')}>
                 {this.props.value[value.id]}
             </div>
         } else {
-            return <div key={value.label}
-                        className={'Cell'}>
+            return <div key={value.label} style={width ? {width: width} : {}}
+                        className={(width ? 'Cell-Sized' : 'Cell')}>
                 {this.props.value[value.id]}
             </div>
         }

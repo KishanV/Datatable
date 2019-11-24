@@ -14,7 +14,6 @@ export interface Column {
     id: string,
     label: string, // display name on user interface.
     type?: 'numeric' | 'string' | 'thumb', // consider default as string.
-    url?: string, // apply url on click
     width?: string // css style based width for column.
 }
 
@@ -58,11 +57,12 @@ export class Datatable extends React.Component<DatatableProps, State> {
     }
 
     // simple utility to generate cell type css class.
-    getCellClass(type?: any) {
-        if (type === 'thumb') {
-            return type;
+    getCellClass(column: Column) {
+        const width = column.width;
+        if (column.type === 'thumb') {
+            return width ? `${column.type} Cell-Sized` : column.type;
         } else {
-            return 'Cell'
+            return width ? 'Cell-Sized' : 'Cell';
         }
     }
 
@@ -79,8 +79,9 @@ export class Datatable extends React.Component<DatatableProps, State> {
     titleBar() {
         const columns = this.props.columns;
         return columns.map(value => {
-            return <div key={value.label}
-                        className={this.getCellClass(value.type)}>{this.getCellLabel(value.label, value.type)}</div>
+            const width = value.width;
+            return <div key={value.label} style={width ? {width: width} : {}}
+                        className={this.getCellClass(value)}>{this.getCellLabel(value.label, value.type)}</div>
         });
     }
 

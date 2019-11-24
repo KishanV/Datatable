@@ -35,12 +35,14 @@ export class App extends React.Component<any, State> {
                 }, {
                     id: 'albumId',
                     label: 'Album No',
-                    type: 'numeric'
+                    type: 'numeric',
+                    width: '100px'
                 }, {
                     id: 'id',
                     label: 'No',
                     searchable: true,
-                    type: 'numeric'
+                    type: 'numeric',
+                    width: '20%'
                 }, {
                     id: 'title',
                     label: 'Title',
