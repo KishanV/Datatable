@@ -33,14 +33,14 @@ export class App extends React.Component<any, State> {
                     label: 'Thumbnail',
                     type: 'thumb'
                 }, {
-                    id: 'albumId',
-                    label: 'Album No',
-                    type: 'numeric',
-                    width: '100px'
-                }, {
                     id: 'id',
                     label: 'No',
                     searchable: true,
+                    type: 'numeric',
+                    width: '100px'
+                }, {
+                    id: 'albumId',
+                    label: 'Album No',
                     type: 'numeric',
                     width: '20%'
                 }, {
