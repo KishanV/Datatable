@@ -37,6 +37,9 @@ export class Raw extends React.Component<Props, any> {
         this.setState({});
     };
 
+    // render data according to type of cell. if type is thumb then render thumbnail and use id value as url.
+    // if type is numeric then render give text align to right.
+    // if type is undefined then render as normal text.
     cell(value: Column) {
         if (value.type === 'thumb') {
             return <div key={value.label}
