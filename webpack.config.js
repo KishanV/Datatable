@@ -26,7 +26,8 @@ module.exports = {
     entry: ["webpack/hot/only-dev-server", "./src/index.tsx"],
     output: {
         filename: "[name].js",
-        chunkFilename: "[name].js"
+        chunkFilename: "[name].js",
+        path: path.join(__dirname, "/build")
     },
     optimization: {
         splitChunks: {
