@@ -58,8 +58,10 @@ export class Datatable extends React.Component<DatatableProps, State> {
     };
 
     componentWillReceiveProps(nextProps: Readonly<DatatableProps>, nextContext: any): void {
-        this.state.loadingMoreData = false;
-        this.onScroll();
+        if (this.state.loadingMoreData) {
+            this.state.loadingMoreData = false;
+            this.onScroll();
+        }
     }
 
     constructor(props: DatatableProps) {
@@ -107,7 +109,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
         }
 
         // when user is is using filter and result will be empty then show 'No Any Data Found.' message.
-        if (this.state.filteredList && this.state.filteredList.length === 0) {
+        if (this.state.filteredList && this.state.filteredList.length === 0 || this.state.search && this.state.search !== '' && this.props.rows.length === 0) {
             return <div ref={this.bodyRef} className={'Body'}>
                 <div className={'No-Data'}>No Any Data Found.</div>
             </div>
@@ -175,42 +177,6 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 break
             }
         }
-        return;
-        const filteredList = [];
-        const rows = this.props.rows;
-        if (rows) {
-            for (let index = 0; index < rows.length; index++) {
-                const row = rows[index];
-                let found = false;
-                for (let num = 0; num < columns.length; num++) {
-                    const column = columns[num];
-                    if (column.searchable && (this.state.filter === 'All' || this.state.filter === column.label)) {
-                        const val = row[column.id].toString() as string;
-                        if (val.toLowerCase().startsWith(value)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if (found) filteredList.push(row);
-            }
-        }
-        this.resetScroll();
-        if (value !== '') {
-            this.setState({
-                filteredList,
-                search: value
-            }, () => {
-                if (this.props.onSearch) this.props.onSearch(this.state.filteredList);
-            });
-        } else {
-            this.setState({
-                filteredList: undefined,
-                search: undefined
-            }, () => {
-                if (this.props.onSearch) this.props.onSearch(this.state.filteredList);
-            });
-        }
     }
 
     resetScroll() {
@@ -250,6 +216,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 <input placeholder={'Search Item'} className={'Input'} value={this.state.search} onChange={event => {
                     const str = event.target.value.trim().toLowerCase();
                     setTimeout(() => {
+                        this.state.search = str;
                         this.runFilter(str);
                     }, 100);
                 }}/>
@@ -272,7 +239,7 @@ export class Datatable extends React.Component<DatatableProps, State> {
     }
 
     loadingMoreData() {
-        if (this.state.loadingMoreData) {
+        if (this.state.loadingMoreData && this.props.isSearching !== true) {
             return <div className={'lodingMoreData'}>Loding....</div>;
         }
     }

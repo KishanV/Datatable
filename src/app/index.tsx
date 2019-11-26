@@ -32,6 +32,8 @@ export class App extends React.Component<any, State> {
             let json = await response.json();
             if (json.length === 0) {
                 this.setState({
+                    isSearching: false,
+                    date: data,
                     canLoad: false
                 });
             } else {
@@ -91,7 +93,6 @@ export class App extends React.Component<any, State> {
                 }}
 
                 onRequestFilter={(type, value) => {
-                    console.log(type, value);
                     let searchQuery;
                     if (type === 'All') {
                         searchQuery = `q=${value}`;
