@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Column, Row} from "./index";
+import {Column, Datatable, Row} from "./index";
 
 interface Props {
     selectedIndex: number[]
@@ -9,6 +9,7 @@ interface Props {
     index: number,
     onSelectionChange?: (selection: number[] | 'All') => void;
     onRowClick?: (rowData: Row, rowIndex: number) => void
+    parent: Datatable,
 }
 
 // created separate component for each row to optimize render process.
@@ -25,16 +26,31 @@ export class Raw extends React.Component<Props, any> {
             const indexOf = this.props.selectedIndex.indexOf(this.props.index);
             if (indexOf !== -1) {
                 this.props.selectedIndex.splice(indexOf, 1);
-                if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
             }
             delete this.props.value.isSelected;
         } else {
             this.props.value.isSelected = true;
             //called back on selection change after cache index.
             this.props.selectedIndex.push(this.props.index);
-            if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
         }
-        this.setState({});
+        this.setState({}, () => {
+            const parent = this.props.parent;
+            if (this.props.selectedIndex.length === parent.props.rows.length) {
+                if (parent.state.isSelectedAll !== true) {
+                    parent.setState({
+                        isSelectedAll: true
+                    });
+                }
+                if (this.props.onSelectionChange) this.props.onSelectionChange('All');
+            } else {
+                if (parent.state.isSelectedAll === true) {
+                    parent.setState({
+                        isSelectedAll: false
+                    });
+                }
+                if (this.props.onSelectionChange) this.props.onSelectionChange(this.props.selectedIndex)
+            }
+        });
     };
 
     // render data according to type of cell. if type is thumb then render thumbnail and use id value as url.
@@ -46,7 +62,9 @@ export class Raw extends React.Component<Props, any> {
         if (value.type === 'thumb') {
             return <div key={value.label}
                         className={'Thumb'}>
-                <div style={{backgroundImage: `url(${this.props.value[value.id]})`}} className={'image'}/>
+                <div
+                    style={{backgroundImage: `url(${this.props.value[value.id]}),url(./f62180dce6d0b49d909d73499074316c.svg)`}}
+                    className={'image'}/>
             </div>
         } else if (value.type === 'numeric') {
             return <div key={value.label} style={width ? {width: width} : {}}

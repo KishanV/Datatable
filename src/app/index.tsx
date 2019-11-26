@@ -4,11 +4,20 @@ import {hot} from 'react-hot-loader/root';
 import {Datatable} from "../datatable";
 
 interface State {
-    date?: any
+    date: any[],
+    loadedPage: number,
+    canLoad: boolean,
+    searchQuery?: string,
+    isSearching: boolean
 }
 
 export class App extends React.Component<any, State> {
-    state: State = {};
+    state: State = {
+        date: [],
+        loadedPage: 0,
+        canLoad: true,
+        isSearching: false
+    };
 
     constructor(props: any) {
         super(props);
@@ -16,18 +25,30 @@ export class App extends React.Component<any, State> {
     }
 
     async loadData() {
-        let response = await fetch("https://jsonplaceholder.typicode.com/photos");
+        const loadedPage = this.state.loadedPage + 1;
+        const data = this.state.date;
+        let response = await fetch(`https://jsonplaceholder.typicode.com/photos?_page=${loadedPage}&_limit=200${this.state.searchQuery ? '&' + this.state.searchQuery : ''}`);
         if (response.ok) {
             let json = await response.json();
-            this.setState({
-                date: json
-            })
+            if (json.length === 0) {
+                this.setState({
+                    canLoad: false
+                });
+            } else {
+                const newData = data.concat(json);
+                this.setState({
+                    isSearching: false,
+                    date: newData,
+                    loadedPage
+                })
+            }
         }
     }
 
     render() {
         return <div className={'App'}>
             <Datatable
+                isSearching={this.state.isSearching}
                 columns={[{
                     id: 'thumbnailUrl',
                     label: 'Thumbnail',
@@ -56,7 +77,36 @@ export class App extends React.Component<any, State> {
                     console.log('onRowClick => data =', data, 'index =', rowIndex)
                 }}
                 onSearch={data => {
-                    console.log('onSearch => ', data)
+                    console.log('onSearch => ', data);
+                }}
+
+                onRequestMoreData={() => {
+                    if (this.state.canLoad) {
+                        this.loadData();
+                        console.log('Start loading more data.');
+                    } else {
+                        console.log('Can not load more data.');
+                    }
+                    return this.state.canLoad;
+                }}
+
+                onRequestFilter={(type, value) => {
+                    console.log(type, value);
+                    let searchQuery;
+                    if (type === 'All') {
+                        searchQuery = `q=${value}`;
+                    } else {
+                        searchQuery = `${type}_like=${value}`;
+                    }
+                    this.setState({
+                        canLoad: true,
+                        searchQuery: searchQuery,
+                        date: [],
+                        loadedPage: 0,
+                        isSearching: true
+                    }, () => {
+                        this.loadData()
+                    });
                 }}
             />
         </div>;

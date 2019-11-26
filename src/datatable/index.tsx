@@ -19,10 +19,13 @@ export interface Column {
 
 export interface DatatableProps {
     columns: Column[]; // columns for table.
-    rows?: Row[]; // actual data will sen via rows.
+    rows: Row[]; // actual data will sen via rows.
     onSelectionChange?: (selection: number[] | 'All',) => void; // will be callback on selection changes if implemented.
     onRowClick?: (rowData: Row, rowIndex: number) => void // will be callback on onRow clicked if implemented.
     onSearch?: (rowData?: Row[]) => void // will be callback on search with collection of searched item as array.
+    onRequestMoreData: () => boolean,
+    onRequestFilter: (type: string, value: string) => void,
+    isSearching?: boolean
 }
 
 interface State {
@@ -30,11 +33,12 @@ interface State {
     isDropdownOpen: boolean,
     filter: 'All' | string,
     search?: string,
-    filteredList?: Row[]
+    filteredList?: Row[],
+    loadingMoreData: boolean
 }
 
 export const CELL_HEIGHT = 51;
-export const CELL_COUNT = 100;
+export const CELL_COUNT = 50;
 
 export class Datatable extends React.Component<DatatableProps, State> {
     //visibleItem and selectedIndex are separate from state because no need to render on change for performance management.
@@ -49,8 +53,14 @@ export class Datatable extends React.Component<DatatableProps, State> {
     state: State = {
         isSelectedAll: false,
         isDropdownOpen: false,
-        filter: 'All'
+        filter: 'All',
+        loadingMoreData: false
     };
+
+    componentWillReceiveProps(nextProps: Readonly<DatatableProps>, nextContext: any): void {
+        this.state.loadingMoreData = false;
+        this.onScroll();
+    }
 
     constructor(props: DatatableProps) {
         super(props);
@@ -75,7 +85,6 @@ export class Datatable extends React.Component<DatatableProps, State> {
         }
     }
 
-
     titleBar() {
         const columns = this.props.columns;
         return columns.map(value => {
@@ -90,6 +99,13 @@ export class Datatable extends React.Component<DatatableProps, State> {
     holderRef: RefObject<Holder> = React.createRef();
 
     body() {
+        // when user is is using filter and result will be empty then show 'No Any Data Found.' message.
+        if (this.props.isSearching) {
+            return <div ref={this.bodyRef} className={'Body'}>
+                <div className={'No-Data'}>Searching....</div>
+            </div>
+        }
+
         // when user is is using filter and result will be empty then show 'No Any Data Found.' message.
         if (this.state.filteredList && this.state.filteredList.length === 0) {
             return <div ref={this.bodyRef} className={'Body'}>
@@ -108,12 +124,12 @@ export class Datatable extends React.Component<DatatableProps, State> {
         return <div ref={this.bodyRef} className={'Body'}>
             {this.props.rows ?
                 <div className={'Seized-Body'} style={{height: `${height}px`}}>
-                    {<Holder selectedIndex={this.selectedIndex}
-                             onRowClick={this.props.onRowClick}
-                             onSelectionChange={this.props.onSelectionChange}
+                    {<Holder {...this.props}
                              ref={this.holderRef}
-                             columns={this.props.columns}
-                             rows={this.state.filteredList ? this.state.filteredList : this.props.rows}/>}
+                             key={this.props.rows.length.toString()}
+                             visibleItem={this.visibleItem}
+                             selectedIndex={this.selectedIndex}
+                             parent={this}/>}
                 </div> : <div className={'No-Data'}>Loading...</div>}
         </div>
     }
@@ -140,13 +156,28 @@ export class Datatable extends React.Component<DatatableProps, State> {
         });
 
         //called back for onSelectionChange listing.
-        if (this.props.onSelectionChange) this.props.onSelectionChange('All');
+        if (this.state.isSelectedAll) {
+            if (this.props.onSelectionChange) this.props.onSelectionChange('All');
+        } else {
+            if (this.props.onSelectionChange) this.props.onSelectionChange(this.selectedIndex)
+        }
     };
 
     runFilter(value: string) {
+        const columns = this.props.columns;
+        for (let num = 0; num < columns.length; num++) {
+            const column = columns[num];
+            if (this.state.filter === column.label) {
+                this.props.onRequestFilter(column.id, value);
+                break
+            } else if (this.state.filter === 'All') {
+                this.props.onRequestFilter('All', value);
+                break
+            }
+        }
+        return;
         const filteredList = [];
         const rows = this.props.rows;
-        const columns = this.props.columns;
         if (rows) {
             for (let index = 0; index < rows.length; index++) {
                 const row = rows[index];
@@ -185,9 +216,6 @@ export class Datatable extends React.Component<DatatableProps, State> {
     resetScroll() {
         this.visibleItem.start = 0;
         this.visibleItem.end = 200;
-        if (this.holderRef.current) {
-            this.holderRef.current.state.visibleItem = this.visibleItem;
-        }
     }
 
     onDropdown(type: string) {
@@ -243,6 +271,12 @@ export class Datatable extends React.Component<DatatableProps, State> {
         </div>;
     }
 
+    loadingMoreData() {
+        if (this.state.loadingMoreData) {
+            return <div className={'lodingMoreData'}>Loding....</div>;
+        }
+    }
+
     render(): React.ReactNode {
         return <div className={'Datatable'}>
             {this.search()}
@@ -257,11 +291,12 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 </div>
                 {this.body()}
             </div>
+            {this.loadingMoreData()}
         </div>;
     }
 
     elementBound?: ClientRect; // store element bound for later use.
-    onScroll = (evt: MouseEvent) => {
+    onScroll = () => {
         const element = this.bodyRef.current;
         if (this.elementBound && element instanceof HTMLDivElement) {
             const visibleItem = this.visibleItem;
@@ -269,6 +304,17 @@ export class Datatable extends React.Component<DatatableProps, State> {
             const endPoint = visibleItem.end * CELL_HEIGHT; // calculate ending pixel as point.
             const scrollTop = element.scrollTop;
             const scrollBottom = scrollTop + this.elementBound.height;
+            const scrollHeight = element.scrollHeight;
+
+            if (scrollBottom === scrollHeight) {
+                const startLoading = this.props.onRequestMoreData();
+                if (startLoading) {
+                    this.setState({
+                        loadingMoreData: true
+                    });
+                }
+                return;
+            }
 
             // check if item need to be refresh from bottom visibility point of view.
             // than sync holder state directly for avoid render itself and render only needed component.
@@ -277,11 +323,9 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 const newStart = selectedItemIndex - 100;
                 const newEnd = selectedItemIndex + 100;
                 this.visibleItem.start = newStart < 0 ? 0 : newStart;
-                this.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length : newEnd;
+                this.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length - 1 : newEnd;
                 if (this.holderRef.current) {
-                    this.holderRef.current.setState({
-                        visibleItem: this.visibleItem
-                    })
+                    this.holderRef.current.setState({});
                 }
             }
 
@@ -291,11 +335,9 @@ export class Datatable extends React.Component<DatatableProps, State> {
                 const newStart = selectedItemIndex - 100;
                 const newEnd = selectedItemIndex + 100;
                 this.visibleItem.start = newStart < 0 ? 0 : newStart;
-                this.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length : newEnd;
+                this.visibleItem.end = newEnd > this.props.rows.length - 1 ? this.props.rows.length - 1 : newEnd;
                 if (this.holderRef.current) {
-                    this.holderRef.current.setState({
-                        visibleItem: this.visibleItem
-                    })
+                    this.holderRef.current.setState({});
                 }
             }
         }

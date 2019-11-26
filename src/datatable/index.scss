@@ -10,6 +10,23 @@
   left: 10px;
   overflow: hidden;
 
+  > .lodingMoreData {
+    position: absolute;
+    z-index: 10;
+    width: 100px;
+    height: auto;
+    bottom: 20px;
+    line-height: 30px;
+    border-radius: 8px;
+    background: #2388FF;
+    color: #fff;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    transform: translateX(-50px);
+    left: 50%;
+    text-align: center;
+    animation: MoveUpDown 1s linear infinite;
+  }
+
   > .Search {
     position: absolute;
     width: 100%;
@@ -315,5 +332,14 @@
         left: 50%;
       }
     }
+  }
+}
+
+@keyframes MoveUpDown {
+  0%, 100% {
+    bottom: 20px;
+  }
+  50% {
+    bottom: 40px;
   }
 }
